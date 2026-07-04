@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #eef2f7; /* Solid fallback background */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .container {
+        width: 100%;
+        max-width: 450px;
+        height: 85vh;
+        background: #ffffff;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        overflow: hidden;
+        position: relative;
+        z-index: 10;
+    }
+
+    .header {
+        padding: 20px 25px;
+        background: #ffffff;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .bot-avatar {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        border-radius: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    .status-info h2 {
+        font-size: 16px;
+        color: #111827;
+    }
+
+    .status-info span {
+        font-size: 12px;
+        color: #10b981;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    #chatbox {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        background: #f9fafb;
+    }
+
+    .msg {
+        padding: 12px 16px;
+        font-size: 14px;
+        line-height: 1.6;
+        max-width: 85%;
+        border-radius: 18px;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user {
+        align-self: flex-end;
+        background: #4f46e5;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .bot {
+        align-self: flex-start;
+        background: white;
+        color: #374151;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Styles for Points and Lists in Bot Response */
+    .bot strong { color: #111827; font-weight: 700; }
+    .bot ul, .bot ol { margin-left: 20px; margin-top: 8px; }
+    .bot li { margin-bottom: 5px; }
+
+    .input-area {
+        padding: 20px;
+        background: white;
+        border-top: 1px solid #f0f0f0;
+        display: flex;
+        gap: 10px;
+    }
+
+    .input-wrapper {
+        flex: 1;
+        background: #f3f4f6;
+        border-radius: 12px;
+        padding: 0 15px;
+        display: flex;
+        align-items: center;
+    }
+
+    input {
+        width: 100%;
+        height: 45px;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 14px;
+    }
+
+    button {
+        width: 45px;
+        height: 45px;
+        background: #4f46e5;
+        border: none;
+        border-radius: 12px;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover { background: #4338ca; transform: scale(1.05); }
+
+    #chatbox::-webkit-scrollbar { width: 5px; }
+    #chatbox::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div class="bot-avatar">AI</div>
+        <div class="status-info">
+            <h2>Raziq AI Assistant</h2>
+            <span>● Online</span>
+        </div>
+    </div>
+
+    <div id="chatbox">
+        <div class="msg bot">Hello! How can I help you today?</div>
+    </div>
+
+    <div class="input-area">
+        <div class="input-wrapper">
+            <input type="text" id="msg" placeholder="Type your message..." autocomplete="off">
+        </div>
+        <button onclick="send()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+    </div>
+</div>
+
+<script>
+// 1. Memory array to store the conversation
+let chatHistory = [
+    {"role": "system", "content": "You are a helpful and professional AI assistant."}
+];
+
+function send() {
+    let msgBox = document.getElementById("msg");
+    let text = msgBox.value.trim();
+    if (!text) return;
+
+    let chatbox = document.getElementById("chatbox");
+
+    // UI par User ka message dikhana
+    chatbox.innerHTML += `<div class="msg user">${text}</div>`;
+    msgBox.value = "";
+    chatbox.scrollTop = chatbox.scrollHeight;
+
+    // 2. User ka message history mein add karein
+    chatHistory.push({"role": "user", "content": text});
+
+    // API Call
+    fetch("/chat", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        // 3. PURI HISTORY BHEJEIN (Sirf ek message nahi)
+        body: JSON.stringify({messages: chatHistory}) 
+    })
+    .then(res => res.json())
+    .then(data => {
+        // 4. Bot ka reply history mein add karein taaki wo agli baar yaad rakhe
+        chatHistory.push({"role": "assistant", "content": data.reply});
+
+        let formattedReply = marked.parse(data.reply);
+        chatbox.innerHTML += `<div class="msg bot">${formattedReply}</div>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+    })
+    .catch(err => {
+        console.error("Error:", err);
+    });
+}
+
+// Enter key support
+document.getElementById("msg").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") send();
+});
+</script>
+
+</body>
+</html>
